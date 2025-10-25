@@ -20,7 +20,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Train search routes
 Route::get('/search-trains', [TrainSearchController::class, 'showSearchForm'])->name('search.trains');
-Route::post('/search-result', [TrainSearchController::class, 'search'])->name('search.trains.post');
+Route::post('/search-trains', [TrainSearchController::class, 'search'])->name('search.trains.post');
 
 // Public pages
 Route::get('/live-tracking', function () {
