@@ -143,33 +143,27 @@
         <div class="mt-8">
             <h3 class="text-xl font-semibold text-gray-900 mb-4">🔥 Popular Routes</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <button onclick="setRoute('DHAKA', 'CHITT')" 
-                        class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200 text-left">
+                <a href="{{ route('search.trains') }}?from=DHAKA&to=CTG" 
+                   class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200">
                     <div class="font-semibold text-gray-800">Dhaka → Chittagong</div>
                     <div class="text-sm text-gray-600">Most popular intercity route</div>
-                </button>
-                <button onclick="setRoute('DHAKA', 'SYLHT')" 
-                        class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200 text-left">
+                </a>
+                <a href="{{ route('search.trains') }}?from=DHAKA&to=SYL" 
+                   class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200">
                     <div class="font-semibold text-gray-800">Dhaka → Sylhet</div>
                     <div class="text-sm text-gray-600">Scenic northeastern journey</div>
-                </button>
-                <button onclick="setRoute('DHAKA', 'RAJSH')" 
-                        class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200 text-left">
+                </a>
+                <a href="{{ route('search.trains') }}?from=DHAKA&to=RAJ" 
+                   class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200">
                     <div class="font-semibold text-gray-800">Dhaka → Rajshahi</div>
                     <div class="text-sm text-gray-600">Western region connection</div>
-                </button>
+                </a>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-function setRoute(from, to) {
-    // This function is kept for backward compatibility but not used with the new link approach
-    document.getElementById('from_station').value = from;
-    document.getElementById('to_station').value = to;
-}
-
 // Check if we have query parameters and set them on page load
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);

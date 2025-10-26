@@ -17,7 +17,7 @@
             <p class="text-gray-600 mb-8 max-w-md mx-auto">
                 You haven't made any train bookings yet. Start by searching for trains and booking your first journey!
             </p>
-            <a href="/search-trains" class="bg-gradient-to-r from-green-600 to-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-red-700 transition duration-200">
+            <a href="{{ route('search.trains') }}" class="bg-gradient-to-r from-green-600 to-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-red-700 transition duration-200">
                 🔍 Search Trains
             </a>
         </div>

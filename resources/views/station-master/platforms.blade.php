@@ -16,7 +16,7 @@
                     <a href="/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200">
                         ← Back to Dashboard
                     </a>
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200" onclick="location.reload();">
                         🔄 Refresh Status
                     </button>
                 </div>
@@ -30,108 +30,40 @@
                     <h2 class="text-xl font-semibold text-gray-800 mb-6">Platform Overview</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Platform 1 -->
-                        <div class="border border-gray-200 rounded-lg p-6">
+                        @forelse($platforms as $platform)
+                        <div class="border {{ $platform->status === 'occupied' ? 'border-red-200 bg-red-50' : ($platform->status === 'maintenance' ? 'border-yellow-200 bg-yellow-50' : 'border-gray-200') }} rounded-lg p-6">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
-                                    <h3 class="text-lg font-semibold text-gray-800">Platform 1</h3>
-                                    <p class="text-sm text-gray-600">Main Express Platform</p>
+                                    <h3 class="text-lg font-semibold text-gray-800">{{ $platform->name }}</h3>
+                                    <p class="text-sm text-gray-600">{{ $platform->description }}</p>
                                 </div>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    Available
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                    @if($platform->status === 'available') bg-green-100 text-green-800
+                                    @elseif($platform->status === 'occupied') bg-red-100 text-red-800
+                                    @elseif($platform->status === 'maintenance') bg-yellow-100 text-yellow-800
+                                    @else bg-gray-100 text-gray-800 @endif">
+                                    {{ ucfirst($platform->status) }}
                                 </span>
                             </div>
                             
                             <div class="space-y-3 mb-4">
+                                @if($platform->status === 'occupied')
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Current Train:</span>
-                                    <span class="font-medium">None</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Next Arrival:</span>
-                                    <span class="font-medium">Suborno Express - 07:30 AM</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Capacity:</span>
-                                    <span class="font-medium">12 Coaches</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Last Maintenance:</span>
-                                    <span class="font-medium">Oct 20, 2025</span>
-                                </div>
-                            </div>
-
-                            <div class="flex space-x-2">
-                                <button class="flex-1 bg-yellow-100 text-yellow-700 py-2 px-3 rounded text-sm hover:bg-yellow-200 transition duration-200">
-                                    🔧 Maintenance
-                                </button>
-                                <button class="flex-1 bg-red-100 text-red-700 py-2 px-3 rounded text-sm hover:bg-red-200 transition duration-200">
-                                    🚫 Block
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Platform 2 -->
-                        <div class="border border-red-200 rounded-lg p-6 bg-red-50">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-800">Platform 2</h3>
-                                    <p class="text-sm text-gray-600">Local Train Platform</p>
-                                </div>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                    Occupied
-                                </span>
-                            </div>
-                            
-                            <div class="space-y-3 mb-4">
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Current Train:</span>
-                                    <span class="font-medium text-red-700">Mohanagar Godhuli (#703)</span>
+                                    <span class="font-medium {{ $platform->status === 'occupied' ? 'text-red-700' : '' }}">{{ $platform->current_train }}</span>
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Departure:</span>
                                     <span class="font-medium">15:45 PM (Delayed)</span>
                                 </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Capacity:</span>
-                                    <span class="font-medium">10 Coaches</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Boarding Status:</span>
-                                    <span class="font-medium text-red-700">In Progress</span>
-                                </div>
-                            </div>
-
-                            <div class="flex space-x-2">
-                                <button class="flex-1 bg-blue-100 text-blue-700 py-2 px-3 rounded text-sm hover:bg-blue-200 transition duration-200">
-                                    📋 Details
-                                </button>
-                                <button class="flex-1 bg-green-100 text-green-700 py-2 px-3 rounded text-sm hover:bg-green-200 transition duration-200">
-                                    ✅ Clear
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Platform 3 -->
-                        <div class="border border-yellow-200 rounded-lg p-6 bg-yellow-50">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-800">Platform 3</h3>
-                                    <p class="text-sm text-gray-600">Freight Platform</p>
-                                </div>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    Maintenance
-                                </span>
-                            </div>
-                            
-                            <div class="space-y-3 mb-4">
+                                @elseif($platform->status === 'maintenance')
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Maintenance Type:</span>
-                                    <span class="font-medium">Track Repair</span>
+                                    <span class="font-medium">{{ $platform->maintenance_notes ?? 'Routine Maintenance' }}</span>
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Started:</span>
-                                    <span class="font-medium">Oct 25, 6:00 AM</span>
+                                    <span class="font-medium">{{ $platform->last_maintenance ? $platform->last_maintenance->format('M d, g:i A') : 'N/A' }}</span>
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Expected Completion:</span>
@@ -141,58 +73,80 @@
                                     <span class="text-gray-600">Progress:</span>
                                     <span class="font-medium">75%</span>
                                 </div>
-                            </div>
-
-                            <div class="flex space-x-2">
-                                <button class="flex-1 bg-blue-100 text-blue-700 py-2 px-3 rounded text-sm hover:bg-blue-200 transition duration-200">
-                                    📋 Update
-                                </button>
-                                <button class="flex-1 bg-green-100 text-green-700 py-2 px-3 rounded text-sm hover:bg-green-200 transition duration-200">
-                                    ✅ Complete
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Platform 4 -->
-                        <div class="border border-gray-200 rounded-lg p-6">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-800">Platform 4</h3>
-                                    <p class="text-sm text-gray-600">Intercity Platform</p>
-                                </div>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    Available
-                                </span>
-                            </div>
-                            
-                            <div class="space-y-3 mb-4">
+                                @else
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Current Train:</span>
                                     <span class="font-medium">None</span>
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Next Arrival:</span>
-                                    <span class="font-medium">Turna Nishita - 23:00 PM</span>
+                                    <span class="font-medium">{{ $platform->next_arrival ? $platform->next_arrival->format('M d, g:i A') : 'N/A' }}</span>
                                 </div>
+                                @endif
+                                
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Capacity:</span>
-                                    <span class="font-medium">8 Coaches</span>
+                                    <span class="font-medium">{{ $platform->capacity }} Coaches</span>
                                 </div>
+                                
+                                @if($platform->status !== 'maintenance')
                                 <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Last Cleaned:</span>
-                                    <span class="font-medium">2 hours ago</span>
+                                    <span class="text-gray-600">Last {{ $platform->status === 'occupied' ? 'Used' : 'Cleaned' }}:</span>
+                                    <span class="font-medium">{{ $platform->last_maintenance ? $platform->last_maintenance->diffForHumans() : 'N/A' }}</span>
                                 </div>
+                                @endif
                             </div>
 
                             <div class="flex space-x-2">
-                                <button class="flex-1 bg-yellow-100 text-yellow-700 py-2 px-3 rounded text-sm hover:bg-yellow-200 transition duration-200">
-                                    🔧 Maintenance
-                                </button>
-                                <button class="flex-1 bg-red-100 text-red-700 py-2 px-3 rounded text-sm hover:bg-red-200 transition duration-200">
-                                    🚫 Block
-                                </button>
+                                @if($platform->status === 'occupied')
+                                <a href="{{ route('station-master.platforms.show', $platform) }}" class="flex-1 bg-blue-100 text-blue-700 py-2 px-3 rounded text-sm hover:bg-blue-200 transition duration-200 text-center">
+                                    📋 Details
+                                </a>
+                                <form action="{{ route('station-master.platforms.update-status', $platform) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="available">
+                                    <button type="submit" class="w-full bg-green-100 text-green-700 py-2 px-3 rounded text-sm hover:bg-green-200 transition duration-200">
+                                        ✅ Clear
+                                    </button>
+                                </form>
+                                @elseif($platform->status === 'maintenance')
+                                <a href="{{ route('station-master.platforms.edit', $platform) }}" class="flex-1 bg-blue-100 text-blue-700 py-2 px-3 rounded text-sm hover:bg-blue-200 transition duration-200 text-center">
+                                    📋 Update
+                                </a>
+                                <form action="{{ route('station-master.platforms.update-status', $platform) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="available">
+                                    <button type="submit" class="w-full bg-green-100 text-green-700 py-2 px-3 rounded text-sm hover:bg-green-200 transition duration-200">
+                                        ✅ Complete
+                                    </button>
+                                </form>
+                                @else
+                                <form action="{{ route('station-master.platforms.update-status', $platform) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="maintenance">
+                                    <button type="submit" class="w-full bg-yellow-100 text-yellow-700 py-2 px-3 rounded text-sm hover:bg-yellow-200 transition duration-200">
+                                        🔧 Maintenance
+                                    </button>
+                                </form>
+                                <form action="{{ route('station-master.platforms.update-status', $platform) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="blocked">
+                                    <button type="submit" class="w-full bg-red-100 text-red-700 py-2 px-3 rounded text-sm hover:bg-red-200 transition duration-200">
+                                        🚫 Block
+                                    </button>
+                                </form>
+                                @endif
                             </div>
                         </div>
+                        @empty
+                        <div class="col-span-2 text-center py-8">
+                            <p class="text-gray-500">No platforms found.</p>
+                        </div>
+                        @endforelse
                     </div>
                 </div>
 
@@ -200,14 +154,14 @@
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-6">Quick Actions</h2>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <button class="bg-blue-50 text-blue-700 p-4 rounded-lg hover:bg-blue-100 transition duration-200">
+                        <button class="bg-blue-50 text-blue-700 p-4 rounded-lg hover:bg-blue-100 transition duration-200" onclick="location.reload();">
                             <div class="text-2xl mb-2">🔄</div>
                             <div class="text-sm font-medium">Refresh All</div>
                         </button>
-                        <button class="bg-yellow-50 text-yellow-700 p-4 rounded-lg hover:bg-yellow-100 transition duration-200">
+                        <a href="{{ route('station-master.platforms.create') }}" class="bg-yellow-50 text-yellow-700 p-4 rounded-lg hover:bg-yellow-100 transition duration-200">
                             <div class="text-2xl mb-2">🔧</div>
                             <div class="text-sm font-medium">Schedule Maintenance</div>
-                        </button>
+                        </a>
                         <button class="bg-red-50 text-red-700 p-4 rounded-lg hover:bg-red-100 transition duration-200">
                             <div class="text-2xl mb-2">🚨</div>
                             <div class="text-sm font-medium">Emergency Block</div>
@@ -225,37 +179,40 @@
                 <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-6">Platform Control</h2>
                     
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Select Platform</label>
-                            <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option>Platform 1</option>
-                                <option>Platform 2</option>
-                                <option>Platform 3</option>
-                                <option>Platform 4</option>
-                            </select>
-                        </div>
+                    <form action="{{ route('station-master.platforms.control-update') }}" method="POST" id="platform-control-form">
+                        @csrf
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Platform</label>
+                                <select name="platform_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="platform-select">
+                                    <option value="">Select a platform</option>
+                                    @foreach($platforms as $platform)
+                                    <option value="{{ $platform->id }}">{{ $platform->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Action</label>
-                            <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option>Change Status</option>
-                                <option>Schedule Maintenance</option>
-                                <option>Assign Train</option>
-                                <option>Clear Platform</option>
-                                <option>Emergency Block</option>
-                            </select>
-                        </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Action</label>
+                                <select name="status" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="action-select">
+                                    <option value="">Select an action</option>
+                                    <option value="available">Change to Available</option>
+                                    <option value="occupied">Change to Occupied</option>
+                                    <option value="maintenance">Schedule Maintenance</option>
+                                    <option value="blocked">Emergency Block</option>
+                                </select>
+                            </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                            <textarea rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Add notes about the action..."></textarea>
-                        </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                                <textarea name="notes" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Add notes about the action..."></textarea>
+                            </div>
 
-                        <button class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
-                            Execute Action
-                        </button>
-                    </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200" id="execute-button" disabled>
+                                Execute Action
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <!-- Platform Statistics -->
@@ -306,5 +263,23 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        // Enable/disable execute button based on selections
+        const platformSelect = document.getElementById('platform-select');
+        const actionSelect = document.getElementById('action-select');
+        const executeButton = document.getElementById('execute-button');
+        
+        function updateFormState() {
+            if (platformSelect.value && actionSelect.value) {
+                executeButton.disabled = false;
+            } else {
+                executeButton.disabled = true;
+            }
+        }
+        
+        platformSelect.addEventListener('change', updateFormState);
+        actionSelect.addEventListener('change', updateFormState);
+    </script>
 </div>
 @endsection

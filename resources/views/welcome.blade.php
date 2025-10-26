@@ -57,9 +57,9 @@
 
                         <!-- Search Button -->
                         <div class="flex items-end">
-                            <button onclick="window.location.href='/search-trains'" class="w-full btn-railway">
+                            <a href="{{ route('search.trains') }}" class="w-full btn-railway text-center">
                                 🔍 Search Trains
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -109,9 +109,9 @@
                         <span class="text-green-600 font-bold">৳ 450+</span>
                     </div>
                     <p class="text-gray-600 mb-4">Multiple daily trains • 5-7 hours journey</p>
-                    <button onclick="window.location.href='/search-trains'" class="w-full bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200 transition duration-200">
+                    <a href="{{ route('search.trains') }}?from=DHAKA&to=CTG" class="w-full bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200 transition duration-200 text-center block">
                         View Trains
-                    </button>
+                    </a>
                 </div>
                 
                 <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
@@ -120,9 +120,9 @@
                         <span class="text-green-600 font-bold">৳ 380+</span>
                     </div>
                     <p class="text-gray-600 mb-4">Daily express trains • 6-8 hours journey</p>
-                    <button onclick="window.location.href='/search-trains'" class="w-full bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200 transition duration-200">
+                    <a href="{{ route('search.trains') }}?from=DHAKA&to=SYL" class="w-full bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200 transition duration-200 text-center block">
                         View Trains
-                    </button>
+                    </a>
                 </div>
                 
                 <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
@@ -131,9 +131,9 @@
                         <span class="text-green-600 font-bold">৳ 320+</span>
                     </div>
                     <p class="text-gray-600 mb-4">Express & mail trains • 4-6 hours journey</p>
-                    <button onclick="window.location.href='/search-trains'" class="w-full bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200 transition duration-200">
+                    <a href="{{ route('search.trains') }}?from=DHAKA&to=RAJ" class="w-full bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200 transition duration-200 text-center block">
                         View Trains
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>

@@ -16,9 +16,9 @@
                     <a href="/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200">
                         ← Back to Dashboard
                     </a>
-                    <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                    <a href="{{ route('admin.trains.create') }}" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
                         + Add New Train
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -26,18 +26,31 @@
         <!-- Trains List -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <div class="p-6 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-semibold text-gray-800">All Trains</h2>
-                    <div class="flex space-x-4">
-                        <input type="text" placeholder="Search trains..." class="px-4 py-2 border border-gray-300 rounded-lg">
-                        <select class="px-4 py-2 border border-gray-300 rounded-lg">
-                            <option>All Types</option>
-                            <option>Express</option>
-                            <option>Mail</option>
-                            <option>Local</option>
-                        </select>
+                <form method="GET" action="{{ route('admin.trains') }}">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-800">All Trains</h2>
+                        <div class="flex space-x-4">
+                            <input type="text" name="search" placeholder="Search trains..." 
+                                   class="px-4 py-2 border border-gray-300 rounded-lg" 
+                                   value="{{ request('search') }}">
+                            <select name="type" class="px-4 py-2 border border-gray-300 rounded-lg">
+                                <option value="">All Types</option>
+                                <option value="express" {{ request('type') == 'express' ? 'selected' : '' }}>Express</option>
+                                <option value="mail" {{ request('type') == 'mail' ? 'selected' : '' }}>Mail</option>
+                                <option value="local" {{ request('type') == 'local' ? 'selected' : '' }}>Local</option>
+                                <option value="intercity" {{ request('type') == 'intercity' ? 'selected' : '' }}>Intercity</option>
+                            </select>
+                            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                                Filter
+                            </button>
+                            @if(request()->has('search') || request()->has('type'))
+                            <a href="{{ route('admin.trains') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200">
+                                Clear
+                            </a>
+                            @endif
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
 
             <div class="overflow-x-auto">
@@ -52,58 +65,51 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($trains as $train)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div>
-                                    <div class="text-sm font-medium text-gray-900">Suborno Express</div>
-                                    <div class="text-sm text-gray-500">Train #701</div>
+                                    <div class="text-sm font-medium text-gray-900">{{ $train->train_name }}</div>
+                                    <div class="text-sm text-gray-500">Train #{{ $train->train_number }}</div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    Express
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                    @if($train->train_type == 'express') bg-blue-100 text-blue-800
+                                    @elseif($train->train_type == 'mail') bg-green-100 text-green-800
+                                    @elseif($train->train_type == 'local') bg-yellow-100 text-yellow-800
+                                    @else bg-purple-100 text-purple-800 @endif">
+                                    {{ ucfirst($train->train_type) }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">12</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $train->total_coaches }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    Active
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                    @if($train->status == 'active') bg-green-100 text-green-800
+                                    @elseif($train->status == 'inactive') bg-red-100 text-red-800
+                                    @else bg-yellow-100 text-yellow-800 @endif">
+                                    {{ ucfirst($train->status) }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">
-                                    <button class="text-blue-600 hover:text-blue-900">Edit</button>
-                                    <button class="text-green-600 hover:text-green-900">Coaches</button>
-                                    <button class="text-red-600 hover:text-red-900">Delete</button>
+                                    <a href="{{ route('admin.trains.edit', $train) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                    <a href="#" class="text-green-600 hover:text-green-900">Coaches</a>
+                                    <form action="{{ route('admin.trains.destroy', $train) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this train?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
+                        @empty
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900">Mohanagar Godhuli</div>
-                                    <div class="text-sm text-gray-500">Train #703</div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    Express
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">10</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    Active
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex space-x-2">
-                                    <button class="text-blue-600 hover:text-blue-900">Edit</button>
-                                    <button class="text-green-600 hover:text-green-900">Coaches</button>
-                                    <button class="text-red-600 hover:text-red-900">Delete</button>
-                                </div>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                No trains found. <a href="{{ route('admin.trains.create') }}" class="text-green-600 hover:text-green-800">Add your first train</a>.
                             </td>
                         </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

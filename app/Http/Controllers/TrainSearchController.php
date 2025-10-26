@@ -8,11 +8,16 @@ use Illuminate\Support\Facades\Log;
 
 class TrainSearchController extends Controller
 {
-    public function showSearchForm()
+    public function showSearchForm(Request $request)
     {
         // Get all stations for the dropdown
         $stations = DB::table('stations')->orderBy('station_name')->get();
-        return view('trains.search-form', compact('stations'));
+        
+        // If we have from and to parameters, we could pre-fill the form
+        $fromStation = $request->query('from');
+        $toStation = $request->query('to');
+        
+        return view('trains.search-form', compact('stations', 'fromStation', 'toStation'));
     }
 
     public function search(Request $request)
