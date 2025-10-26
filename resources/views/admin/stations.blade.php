@@ -80,9 +80,9 @@
                 <div class="mt-4 flex space-x-2">
                     <a href="{{ route('admin.stations.edit', $station) }}" class="text-blue-600 hover:text-blue-900 text-sm">Edit</a>
                     <a href="#" class="text-green-600 hover:text-green-900 text-sm">View Map</a>
-                    <form action="{{ route('admin.stations.destroy', $station) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this station?');">
+                    <form action="{{ route('admin.stations.toggle-status', $station) }}" method="POST">
                         @csrf
-                        @method('DELETE')
+                        @method('PATCH')
                         <button type="submit" class="text-red-600 hover:text-red-900 text-sm">
                             @if($station->status == 'active') Deactivate @else Activate @endif
                         </button>

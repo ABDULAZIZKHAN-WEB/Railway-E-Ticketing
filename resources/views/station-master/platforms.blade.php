@@ -1,6 +1,6 @@
 @extends('layouts.railway')
 
-@section('title', 'Platform Status - Station Master')
+@section('title', 'Platform Management - Station Master')
 
 @section('content')
 <div class="bg-gray-50 min-h-screen py-8">
@@ -9,33 +9,32 @@
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800">🔧 Platform Status Management</h1>
-                    <p class="text-gray-600 mt-2">Monitor and manage platform availability and maintenance</p>
+                    <h1 class="text-3xl font-bold text-gray-800">🔧 Platform Management</h1>
+                    <p class="text-gray-600 mt-2">Manage platform status and operations</p>
                 </div>
                 <div class="flex space-x-4">
                     <a href="/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200">
                         ← Back to Dashboard
                     </a>
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200" onclick="location.reload();">
-                        🔄 Refresh Status
-                    </button>
+                    <a href="{{ route('station-master.platforms.create') }}" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                        + Add New Platform
+                    </a>
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Platform Overview -->
+            <!-- Platform Status Overview -->
             <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Platform Overview</h2>
-                    
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Platform Status</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         @forelse($platforms as $platform)
-                        <div class="border {{ $platform->status === 'occupied' ? 'border-red-200 bg-red-50' : ($platform->status === 'maintenance' ? 'border-yellow-200 bg-yellow-50' : 'border-gray-200') }} rounded-lg p-6">
-                            <div class="flex justify-between items-start mb-4">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-3">
                                 <div>
-                                    <h3 class="text-lg font-semibold text-gray-800">{{ $platform->name }}</h3>
-                                    <p class="text-sm text-gray-600">{{ $platform->description }}</p>
+                                    <h3 class="font-medium text-gray-800">{{ $platform->name }}</h3>
+                                    <p class="text-sm text-gray-600">{{ $platform->description ?? 'No description' }}</p>
                                 </div>
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                                     @if($platform->status === 'available') bg-green-100 text-green-800
@@ -46,62 +45,28 @@
                                 </span>
                             </div>
                             
-                            <div class="space-y-3 mb-4">
-                                @if($platform->status === 'occupied')
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Current Train:</span>
-                                    <span class="font-medium {{ $platform->status === 'occupied' ? 'text-red-700' : '' }}">{{ $platform->current_train }}</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Departure:</span>
-                                    <span class="font-medium">15:45 PM (Delayed)</span>
-                                </div>
-                                @elseif($platform->status === 'maintenance')
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Maintenance Type:</span>
-                                    <span class="font-medium">{{ $platform->maintenance_notes ?? 'Routine Maintenance' }}</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Started:</span>
-                                    <span class="font-medium">{{ $platform->last_maintenance ? $platform->last_maintenance->format('M d, g:i A') : 'N/A' }}</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Expected Completion:</span>
-                                    <span class="font-medium">Oct 25, 4:00 PM</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Progress:</span>
-                                    <span class="font-medium">75%</span>
-                                </div>
-                                @else
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Current Train:</span>
-                                    <span class="font-medium">None</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Next Arrival:</span>
-                                    <span class="font-medium">{{ $platform->next_arrival ? $platform->next_arrival->format('M d, g:i A') : 'N/A' }}</span>
-                                </div>
+                            <div class="text-sm text-gray-600 mb-4">
+                                <p>Type: {{ ucfirst($platform->type) }}</p>
+                                <p>Capacity: {{ $platform->capacity }} trains</p>
+                                @if($platform->current_train)
+                                <p>Current Train: {{ $platform->current_train }}</p>
                                 @endif
-                                
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Capacity:</span>
-                                    <span class="font-medium">{{ $platform->capacity }} Coaches</span>
-                                </div>
-                                
-                                @if($platform->status !== 'maintenance')
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Last {{ $platform->status === 'occupied' ? 'Used' : 'Cleaned' }}:</span>
-                                    <span class="font-medium">{{ $platform->last_maintenance ? $platform->last_maintenance->diffForHumans() : 'N/A' }}</span>
-                                </div>
+                                @if($platform->next_arrival)
+                                <p>Next Arrival: {{ $platform->next_arrival->format('M d, Y H:i') }}</p>
                                 @endif
                             </div>
-
+                            
                             <div class="flex space-x-2">
-                                @if($platform->status === 'occupied')
-                                <a href="{{ route('station-master.platforms.show', $platform) }}" class="flex-1 bg-blue-100 text-blue-700 py-2 px-3 rounded text-sm hover:bg-blue-200 transition duration-200 text-center">
-                                    📋 Details
-                                </a>
+                                @if($platform->status === 'available')
+                                <form action="{{ route('station-master.platforms.update-status', $platform) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="occupied">
+                                    <button type="submit" class="w-full bg-red-100 text-red-700 py-2 px-3 rounded text-sm hover:bg-red-200 transition duration-200">
+                                        🚂 Occupy
+                                    </button>
+                                </form>
+                                @elseif($platform->status === 'occupied')
                                 <form action="{{ route('station-master.platforms.update-status', $platform) }}" method="POST" class="flex-1">
                                     @csrf
                                     @method('PATCH')
@@ -179,7 +144,7 @@
                 <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-6">Platform Control</h2>
                     
-                    <form action="{{ route('station-master.platforms.control-update') }}" method="POST" id="platform-control-form">
+                    <form action="{{ route('station-master.platforms.control-panel') }}" method="POST" id="platform-control-form">
                         @csrf
                         <div class="space-y-4">
                             <div>

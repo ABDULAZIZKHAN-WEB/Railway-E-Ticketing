@@ -4,6 +4,7 @@ namespace App\Http\Controllers\StationMaster;
 
 use App\Http\Controllers\Controller;
 use App\Models\TrainSchedule;
+use App\Models\Platform;
 use Illuminate\Http\Request;
 
 class ScheduleController extends Controller
@@ -16,7 +17,7 @@ class ScheduleController extends Controller
         // Get today's schedules
         $today = now()->format('w'); // 0 for Sunday, 6 for Saturday
         
-        $schedules = TrainSchedule::with(['train', 'route.startStation', 'route.endStation'])
+        $schedules = TrainSchedule::with(['train', 'route.startStation', 'route.endStation', 'route.routeStations.station'])
             ->where('status', 'active')
             ->whereJsonContains('running_days_json', $today)
             ->where('effective_from', '<=', now())

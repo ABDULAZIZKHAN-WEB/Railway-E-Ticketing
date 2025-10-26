@@ -17,51 +17,46 @@
             <!-- Train Search Form -->
             <div class="max-w-4xl mx-auto search-form-railway">
                 <div class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <!-- From Station -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">From Station</label>
-                            <select name="from_station" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900">
-                                <option value="">Select Station</option>
-                                <option value="DHAKA">Dhaka (ঢাকা)</option>
-                                <option value="CTG">Chittagong (চট্টগ্রাম)</option>
-                                <option value="SYL">Sylhet (সিলেট)</option>
-                                <option value="RAJ">Rajshahi (রাজশাহী)</option>
-                                <option value="KHL">Khulna (খুলনা)</option>
-                                <option value="COM">Comilla (কুমিল্লা)</option>
-                                <option value="MYM">Mymensingh (ময়মনসিংহ)</option>
-                            </select>
-                        </div>
+                    <form action="{{ route('search.trains') }}" method="POST">
+                        @csrf
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <!-- From Station -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">From Station</label>
+                                <select name="from_station" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900">
+                                    <option value="">Select Station</option>
+                                    @foreach($stations as $station)
+                                        <option value="{{ $station->station_code }}">{{ $station->station_name }} ({{ $station->station_name_bn }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        <!-- To Station -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">To Station</label>
-                            <select name="to_station" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900">
-                                <option value="">Select Station</option>
-                                <option value="DHAKA">Dhaka (ঢাকা)</option>
-                                <option value="CTG">Chittagong (চট্টগ্রাম)</option>
-                                <option value="SYL">Sylhet (সিলেট)</option>
-                                <option value="RAJ">Rajshahi (রাজশাহী)</option>
-                                <option value="KHL">Khulna (খুলনা)</option>
-                                <option value="COM">Comilla (কুমিল্লা)</option>
-                                <option value="MYM">Mymensingh (ময়মনসিংহ)</option>
-                            </select>
-                        </div>
+                            <!-- To Station -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">To Station</label>
+                                <select name="to_station" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900">
+                                    <option value="">Select Station</option>
+                                    @foreach($stations as $station)
+                                        <option value="{{ $station->station_code }}">{{ $station->station_name }} ({{ $station->station_name_bn }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        <!-- Journey Date -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Journey Date</label>
-                            <input type="date" name="journey_date" required min="{{ date('Y-m-d') }}" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900">
-                        </div>
+                            <!-- Journey Date -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Journey Date</label>
+                                <input type="date" name="journey_date" required min="{{ date('Y-m-d') }}" 
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900">
+                            </div>
 
-                        <!-- Search Button -->
-                        <div class="flex items-end">
-                            <a href="{{ route('search.trains') }}" class="w-full btn-railway text-center">
-                                🔍 Search Trains
-                            </a>
+                            <!-- Search Button -->
+                            <div class="flex items-end">
+                                <button type="submit" class="w-full btn-railway text-center">
+                                    🔍 Search Trains
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -73,10 +68,10 @@
         <div class="max-w-7xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-gray-800 mb-8">Get Started Today</h2>
             <div class="space-x-4">
-                <a href="/register" class="bg-green-600 text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-green-700 transition duration-200 shadow-lg">
+                <a href="{{ route('register') }}" class="bg-green-600 text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-green-700 transition duration-200 shadow-lg">
                     📝 Create Account
                 </a>
-                <a href="/login" class="border-2 border-green-600 text-green-600 px-8 py-4 rounded-lg text-lg font-medium hover:bg-green-50 transition duration-200">
+                <a href="{{ route('login') }}" class="border-2 border-green-600 text-green-600 px-8 py-4 rounded-lg text-lg font-medium hover:bg-green-50 transition duration-200">
                     🔐 Login
                 </a>
             </div>
@@ -87,10 +82,10 @@
         <div class="max-w-7xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-gray-800 mb-8">Welcome back, {{ Auth::user()->name }}!</h2>
             <div class="space-x-4">
-                <a href="/dashboard" class="bg-green-600 text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-green-700 transition duration-200 shadow-lg">
+                <a href="{{ route('dashboard') }}" class="bg-green-600 text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-green-700 transition duration-200 shadow-lg">
                     📊 Go to Dashboard
                 </a>
-                <a href="/my-bookings" class="border-2 border-green-600 text-green-600 px-8 py-4 rounded-lg text-lg font-medium hover:bg-green-50 transition duration-200">
+                <a href="{{ route('my.bookings') }}" class="border-2 border-green-600 text-green-600 px-8 py-4 rounded-lg text-lg font-medium hover:bg-green-50 transition duration-200">
                     🎫 My Bookings
                 </a>
             </div>
@@ -103,38 +98,18 @@
         <div class="max-w-7xl mx-auto px-4">
             <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">🔥 Popular Routes</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                @foreach($popularRoutes as $route)
                 <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
                     <div class="flex justify-between items-center mb-4">
-                        <span class="text-lg font-semibold text-gray-800">Dhaka → Chittagong</span>
-                        <span class="text-green-600 font-bold">৳ 450+</span>
+                        <span class="text-lg font-semibold text-gray-800">{{ $route['from'] }} → {{ $route['to'] }}</span>
+                        <span class="text-green-600 font-bold">৳ {{ $route['price'] }}</span>
                     </div>
-                    <p class="text-gray-600 mb-4">Multiple daily trains • 5-7 hours journey</p>
-                    <a href="{{ route('search.trains') }}?from=DHAKA&to=CTG" class="w-full bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200 transition duration-200 text-center block">
+                    <p class="text-gray-600 mb-4">{{ $route['trains'] }} • {{ $route['duration'] }} journey</p>
+                    <a href="{{ route('search.trains') }}?from={{ urlencode($route['from']) }}&to={{ urlencode($route['to']) }}" class="w-full bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200 transition duration-200 text-center block">
                         View Trains
                     </a>
                 </div>
-                
-                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-lg font-semibold text-gray-800">Dhaka → Sylhet</span>
-                        <span class="text-green-600 font-bold">৳ 380+</span>
-                    </div>
-                    <p class="text-gray-600 mb-4">Daily express trains • 6-8 hours journey</p>
-                    <a href="{{ route('search.trains') }}?from=DHAKA&to=SYL" class="w-full bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200 transition duration-200 text-center block">
-                        View Trains
-                    </a>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-lg font-semibold text-gray-800">Dhaka → Rajshahi</span>
-                        <span class="text-green-600 font-bold">৳ 320+</span>
-                    </div>
-                    <p class="text-gray-600 mb-4">Express & mail trains • 4-6 hours journey</p>
-                    <a href="{{ route('search.trains') }}?from=DHAKA&to=RAJ" class="w-full bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200 transition duration-200 text-center block">
-                        View Trains
-                    </a>
-                </div>
+                @endforeach
             </div>
         </div>
     </div>
@@ -176,19 +151,19 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
                 <div>
-                    <div class="text-4xl font-bold mb-2">50,000+</div>
+                    <div class="text-4xl font-bold mb-2">{{ $stats['happy_passengers'] }}+</div>
                     <div class="text-green-100">Happy Passengers</div>
                 </div>
                 <div>
-                    <div class="text-4xl font-bold mb-2">100+</div>
+                    <div class="text-4xl font-bold mb-2">{{ $stats['train_routes'] }}</div>
                     <div class="text-green-100">Train Routes</div>
                 </div>
                 <div>
-                    <div class="text-4xl font-bold mb-2">24/7</div>
+                    <div class="text-4xl font-bold mb-2">{{ $stats['customer_support'] }}</div>
                     <div class="text-green-100">Customer Support</div>
                 </div>
                 <div>
-                    <div class="text-4xl font-bold mb-2">99.9%</div>
+                    <div class="text-4xl font-bold mb-2">{{ $stats['uptime_guarantee'] }}</div>
                     <div class="text-green-100">Uptime Guarantee</div>
                 </div>
             </div>

@@ -144,17 +144,17 @@
             <h3 class="text-xl font-semibold text-gray-900 mb-4">🔥 Popular Routes</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <a href="{{ route('search.trains') }}?from=DHAKA&to=CTG" 
-                   class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200">
+                   class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200 hover:bg-green-50">
                     <div class="font-semibold text-gray-800">Dhaka → Chittagong</div>
                     <div class="text-sm text-gray-600">Most popular intercity route</div>
                 </a>
                 <a href="{{ route('search.trains') }}?from=DHAKA&to=SYL" 
-                   class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200">
+                   class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200 hover:bg-green-50">
                     <div class="font-semibold text-gray-800">Dhaka → Sylhet</div>
                     <div class="text-sm text-gray-600">Scenic northeastern journey</div>
                 </a>
                 <a href="{{ route('search.trains') }}?from=DHAKA&to=RAJ" 
-                   class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200">
+                   class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200 hover:bg-green-50">
                     <div class="font-semibold text-gray-800">Dhaka → Rajshahi</div>
                     <div class="text-sm text-gray-600">Western region connection</div>
                 </a>
@@ -166,65 +166,75 @@
 <script>
 // Check if we have query parameters and set them on page load
 document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const fromStation = urlParams.get('from');
-    const toStation = urlParams.get('to');
+    // Check if elements exist before trying to access them
+    const fromStationElement = document.getElementById('from_station');
+    const toStationElement = document.getElementById('to_station');
     
-    if (fromStation) {
-        document.getElementById('from_station').value = fromStation;
-    }
-    
-    if (toStation) {
-        document.getElementById('to_station').value = toStation;
-    }
-});
-
-// Prevent selecting same station for from and to
-document.getElementById('from_station').addEventListener('change', function() {
-    const toSelect = document.getElementById('to_station');
-    const selectedValue = this.value;
-    
-    // Enable all options first
-    Array.from(toSelect.options).forEach(option => {
-        option.disabled = false;
-    });
-    
-    // Disable the selected from station in to dropdown
-    if (selectedValue) {
-        Array.from(toSelect.options).forEach(option => {
-            if (option.value === selectedValue) {
-                option.disabled = true;
+    if (fromStationElement && toStationElement) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromStation = urlParams.get('from');
+        const toStation = urlParams.get('to');
+        
+        if (fromStation) {
+            fromStationElement.value = fromStation;
+        }
+        
+        if (toStation) {
+            toStationElement.value = toStation;
+        }
+        
+        // Add event listeners only if elements exist
+        fromStationElement.addEventListener('change', function() {
+            const toSelect = document.getElementById('to_station');
+            const selectedValue = this.value;
+            
+            if (toSelect) {
+                // Enable all options first
+                Array.from(toSelect.options).forEach(option => {
+                    option.disabled = false;
+                });
+                
+                // Disable the selected from station in to dropdown
+                if (selectedValue) {
+                    Array.from(toSelect.options).forEach(option => {
+                        if (option.value === selectedValue) {
+                            option.disabled = true;
+                        }
+                    });
+                    
+                    // If to station is same as from, reset it
+                    if (toSelect.value === selectedValue) {
+                        toSelect.value = '';
+                    }
+                }
             }
         });
         
-        // If to station is same as from, reset it
-        if (toSelect.value === selectedValue) {
-            toSelect.value = '';
-        }
-    }
-});
-
-document.getElementById('to_station').addEventListener('change', function() {
-    const fromSelect = document.getElementById('from_station');
-    const selectedValue = this.value;
-    
-    // Enable all options first
-    Array.from(fromSelect.options).forEach(option => {
-        option.disabled = false;
-    });
-    
-    // Disable the selected to station in from dropdown
-    if (selectedValue) {
-        Array.from(fromSelect.options).forEach(option => {
-            if (option.value === selectedValue) {
-                option.disabled = true;
+        toStationElement.addEventListener('change', function() {
+            const fromSelect = document.getElementById('from_station');
+            const selectedValue = this.value;
+            
+            if (fromSelect) {
+                // Enable all options first
+                Array.from(fromSelect.options).forEach(option => {
+                    option.disabled = false;
+                });
+                
+                // Disable the selected to station in from dropdown
+                if (selectedValue) {
+                    Array.from(fromSelect.options).forEach(option => {
+                        if (option.value === selectedValue) {
+                            option.disabled = true;
+                        }
+                    });
+                    
+                    // If from station is same as to, reset it
+                    if (fromSelect.value === selectedValue) {
+                        fromSelect.value = '';
+                    }
+                }
             }
         });
-        
-        // If from station is same as to, reset it
-        if (fromSelect.value === selectedValue) {
-            fromSelect.value = '';
-        }
     }
 });
 </script>

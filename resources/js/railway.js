@@ -40,23 +40,25 @@ function initializeRailwayApp() {
 function enhanceForms() {
     // Add floating labels effect
     const inputs = document.querySelectorAll('.input-railway');
-    inputs.forEach(input => {
-        // Add focus/blur effects
-        input.addEventListener('focus', function() {
-            this.parentElement.classList.add('focused');
+    if (inputs.length > 0) {
+        inputs.forEach(input => {
+            // Add focus/blur effects
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentElement.classList.remove('focused');
+                }
+            });
+            
+            // Real-time validation
+            input.addEventListener('input', function() {
+                validateField(this);
+            });
         });
-        
-        input.addEventListener('blur', function() {
-            if (!this.value) {
-                this.parentElement.classList.remove('focused');
-            }
-        });
-        
-        // Real-time validation
-        input.addEventListener('input', function() {
-            validateField(this);
-        });
-    });
+    }
     
     // Remove automatic loading states - let forms submit normally
     console.log('Form enhancements initialized');
@@ -123,57 +125,63 @@ function enhanceSearchForm() {
 function initializeSeatSelection() {
     // Seat class selection
     const seatClassCards = document.querySelectorAll('.seat-class-card');
-    seatClassCards.forEach(card => {
-        card.addEventListener('click', function() {
-            // Remove selected class from all cards
-            seatClassCards.forEach(c => c.classList.remove('selected'));
-            
-            // Add selected class to clicked card
-            this.classList.add('selected');
-            
-            // Store selection
-            const trainNumber = this.dataset.train;
-            const classCode = this.dataset.class;
-            const fare = this.dataset.fare;
-            
-            if (trainNumber && classCode && fare) {
-                sessionStorage.setItem('selectedSeatClass', JSON.stringify({
-                    train_number: trainNumber,
-                    class_code: classCode,
-                    fare: fare
-                }));
-            }
+    if (seatClassCards.length > 0) {
+        seatClassCards.forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove selected class from all cards
+                seatClassCards.forEach(c => c.classList.remove('selected'));
+                
+                // Add selected class to clicked card
+                this.classList.add('selected');
+                
+                // Store selection
+                const trainNumber = this.dataset.train;
+                const classCode = this.dataset.class;
+                const fare = this.dataset.fare;
+                
+                if (trainNumber && classCode && fare) {
+                    sessionStorage.setItem('selectedSeatClass', JSON.stringify({
+                        train_number: trainNumber,
+                        class_code: classCode,
+                        fare: fare
+                    }));
+                }
+            });
         });
-    });
+    }
 }
 
 function initializeNotifications() {
     // Auto-hide notifications after 5 seconds
     const notifications = document.querySelectorAll('.notification-success, .notification-error, .notification-info');
-    notifications.forEach(notification => {
-        setTimeout(() => {
-            hideNotification(notification);
-        }, 5000);
-        
-        // Add close button
-        const closeBtn = document.createElement('button');
-        closeBtn.innerHTML = '×';
-        closeBtn.className = 'float-right text-xl font-bold opacity-70 hover:opacity-100';
-        closeBtn.addEventListener('click', () => hideNotification(notification));
-        notification.appendChild(closeBtn);
-    });
+    if (notifications.length > 0) {
+        notifications.forEach(notification => {
+            setTimeout(() => {
+                hideNotification(notification);
+            }, 5000);
+            
+            // Add close button
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '×';
+            closeBtn.className = 'float-right text-xl font-bold opacity-70 hover:opacity-100';
+            closeBtn.addEventListener('click', () => hideNotification(notification));
+            notification.appendChild(closeBtn);
+        });
+    }
 }
 
 function initializeLoadingStates() {
     // Add loading states to buttons
     const buttons = document.querySelectorAll('.btn-railway, .btn-railway-outline');
-    buttons.forEach(button => {
-        button.addEventListener('click', function() {
-            if (this.type === 'submit' || this.dataset.loading === 'true') {
-                showLoadingState(this);
-            }
+    if (buttons.length > 0) {
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.type === 'submit' || this.dataset.loading === 'true') {
+                    showLoadingState(this);
+                }
+            });
         });
-    });
+    }
 }
 
 function initializeAnimations() {
@@ -190,7 +198,9 @@ function initializeAnimations() {
     
     // Observe elements with animation classes
     const animatedElements = document.querySelectorAll('.card-railway, .train-card, .form-railway');
-    animatedElements.forEach(el => observer.observe(el));
+    if (animatedElements.length > 0) {
+        animatedElements.forEach(el => observer.observe(el));
+    }
 }
 
 // Utility Functions
@@ -340,13 +350,15 @@ function initializeLiveTracking() {
 
 function updateTrainStatus() {
     const statusElements = document.querySelectorAll('.train-status');
-    statusElements.forEach(element => {
-        // Add pulse animation to indicate live updates
-        element.classList.add('pulse-railway');
-        setTimeout(() => {
-            element.classList.remove('pulse-railway');
-        }, 1000);
-    });
+    if (statusElements.length > 0) {
+        statusElements.forEach(element => {
+            // Add pulse animation to indicate live updates
+            element.classList.add('pulse-railway');
+            setTimeout(() => {
+                element.classList.remove('pulse-railway');
+            }, 1000);
+        });
+    }
 }
 
 // Booking Functions

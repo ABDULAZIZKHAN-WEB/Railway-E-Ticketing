@@ -65,8 +65,16 @@
         </div>
 
         <!-- Admin Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <a href="/admin/trains" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+            <a href="{{ route('admin.train-schedules.index') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
+                <div class="text-center">
+                    <div class="text-4xl mb-4 group-hover:scale-110 transition duration-200">🕒</div>
+                    <h3 class="font-semibold text-gray-800">Train Schedules</h3>
+                    <p class="text-sm text-gray-600">Manage schedules</p>
+                </div>
+            </a>
+
+            <a href="{{ route('admin.trains') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
                 <div class="text-center">
                     <div class="text-4xl mb-4 group-hover:scale-110 transition duration-200">🚄</div>
                     <h3 class="font-semibold text-gray-800">Manage Trains</h3>
@@ -74,7 +82,7 @@
                 </div>
             </a>
 
-            <a href="/admin/stations" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
+            <a href="{{ route('admin.stations') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
                 <div class="text-center">
                     <div class="text-4xl mb-4 group-hover:scale-110 transition duration-200">🏢</div>
                     <h3 class="font-semibold text-gray-800">Manage Stations</h3>
@@ -82,7 +90,7 @@
                 </div>
             </a>
 
-            <a href="/admin/users" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
+            <a href="{{ route('admin.users') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
                 <div class="text-center">
                     <div class="text-4xl mb-4 group-hover:scale-110 transition duration-200">👥</div>
                     <h3 class="font-semibold text-gray-800">Manage Users</h3>
@@ -90,7 +98,7 @@
                 </div>
             </a>
 
-            <a href="/admin/reports" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
+            <a href="{{ route('admin.reports') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
                 <div class="text-center">
                     <div class="text-4xl mb-4 group-hover:scale-110 transition duration-200">📊</div>
                     <h3 class="font-semibold text-gray-800">Reports</h3>
@@ -110,7 +118,7 @@
                             <div>
                                 <h4 class="font-medium text-gray-800">{{ $booking->booking_reference }}</h4>
                                 <p class="text-sm text-gray-600">{{ $booking->user_name }}</p>
-                                <p class="text-xs text-gray-500">{{ $booking->created_at }}</p>
+                                <p class="text-xs text-gray-500">{{ $booking->created_at->format('M d, Y H:i') }}</p>
                             </div>
                             <div class="text-right">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -173,6 +181,10 @@
                         <div class="flex justify-between">
                             <span class="text-gray-600">Active Users</span>
                             <span class="font-semibold">{{ $stats['total_users'] }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Train Schedules</span>
+                            <span class="font-semibold">{{ $stats['total_schedules'] ?? 0 }}</span>
                         </div>
                     </div>
                 </div>

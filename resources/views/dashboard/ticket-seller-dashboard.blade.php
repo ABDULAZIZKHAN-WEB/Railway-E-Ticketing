@@ -38,7 +38,7 @@
                 <div class="flex items-center">
                     <div class="text-3xl mr-4">💰</div>
                     <div>
-                        <h3 class="text-2xl font-bold text-green-600">৳{{ number_format($seller_stats['cash_collected']) }}</h3>
+                        <h3 class="text-2xl font-bold text-green-600">৳{{ number_format($seller_stats['cash_collected'], 2) }}</h3>
                         <p class="text-sm text-gray-600">Cash Collected</p>
                     </div>
                 </div>
@@ -58,7 +58,13 @@
                 <div class="flex items-center">
                     <div class="text-3xl mr-4">📊</div>
                     <div>
-                        <h3 class="text-2xl font-bold text-blue-600">{{ number_format($seller_stats['cash_collected'] / $seller_stats['tickets_sold_today']) }}</h3>
+                        <h3 class="text-2xl font-bold text-blue-600">
+                            @if($seller_stats['tickets_sold_today'] > 0)
+                                ৳{{ number_format($seller_stats['cash_collected'] / $seller_stats['tickets_sold_today'], 2) }}
+                            @else
+                                ৳0.00
+                            @endif
+                        </h3>
                         <p class="text-sm text-gray-600">Avg. Ticket Price</p>
                     </div>
                 </div>
@@ -67,7 +73,7 @@
 
         <!-- Ticket Seller Actions -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <a href="/ticket-seller/booking" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
+            <a href="{{ route('ticket-seller.booking') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
                 <div class="text-center">
                     <div class="text-4xl mb-4 group-hover:scale-110 transition duration-200">🎫</div>
                     <h3 class="font-semibold text-gray-800">New Booking</h3>
@@ -75,7 +81,7 @@
                 </div>
             </a>
 
-            <a href="/ticket-seller/search" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
+            <a href="{{ route('ticket-seller.search') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
                 <div class="text-center">
                     <div class="text-4xl mb-4 group-hover:scale-110 transition duration-200">🔍</div>
                     <h3 class="font-semibold text-gray-800">Search Booking</h3>
@@ -83,7 +89,7 @@
                 </div>
             </a>
 
-            <a href="/ticket-seller/print" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
+            <a href="{{ route('ticket-seller.print') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
                 <div class="text-center">
                     <div class="text-4xl mb-4 group-hover:scale-110 transition duration-200">🖨️</div>
                     <h3 class="font-semibold text-gray-800">Print Ticket</h3>
@@ -91,7 +97,7 @@
                 </div>
             </a>
 
-            <a href="/ticket-seller/cash-report" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
+            <a href="{{ route('ticket-seller.cash-report') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200 group">
                 <div class="text-center">
                     <div class="text-4xl mb-4 group-hover:scale-110 transition duration-200">💰</div>
                     <h3 class="font-semibold text-gray-800">Cash Report</h3>
@@ -105,25 +111,31 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-semibold text-gray-800 mb-6">💳 Recent Sales</h2>
                 <div class="space-y-4">
-                    @foreach($recent_sales as $sale)
-                    <div class="border border-gray-200 rounded-lg p-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-medium text-gray-800">{{ $sale['pnr'] }}</h4>
-                                <p class="text-sm text-gray-600">{{ $sale['passenger'] }}</p>
-                                <p class="text-xs text-gray-500">{{ $sale['train'] }} • {{ $sale['time'] }}</p>
+                    @if(isset($recentSales) && count($recentSales) > 0)
+                        @foreach($recentSales as $sale)
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-medium text-gray-800">{{ $sale['pnr'] }}</h4>
+                                    <p class="text-sm text-gray-600">{{ $sale['passenger'] }}</p>
+                                    <p class="text-xs text-gray-500">{{ $sale['train'] }} • {{ $sale['time'] }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-lg font-bold text-green-600">৳{{ number_format($sale['amount'], 2) }}</span>
+                                    <p class="text-xs text-gray-500">Cash Payment</p>
+                                </div>
                             </div>
-                            <div class="text-right">
-                                <span class="text-lg font-bold text-green-600">৳{{ number_format($sale['amount']) }}</span>
-                                <p class="text-xs text-gray-500">Cash Payment</p>
+                            <div class="mt-3 flex space-x-2">
+                                <button class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Print Ticket</button>
+                                <button class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">View Details</button>
                             </div>
                         </div>
-                        <div class="mt-3 flex space-x-2">
-                            <button class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Print Ticket</button>
-                            <button class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">View Details</button>
+                        @endforeach
+                    @else
+                        <div class="text-center py-8 text-gray-500">
+                            <p>No recent sales found</p>
                         </div>
-                    </div>
-                    @endforeach
+                    @endif
                 </div>
             </div>
 
@@ -134,30 +146,32 @@
                 <!-- Quick Booking Form -->
                 <div class="mb-6">
                     <h3 class="font-semibold text-gray-800 mb-4">Quick Booking</h3>
-                    <form class="space-y-4">
+                    <form class="space-y-4" action="{{ route('ticket-seller.booking') }}" method="GET">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">From</label>
-                                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                                    <option>Dhaka</option>
-                                    <option>Chittagong</option>
-                                    <option>Sylhet</option>
+                                <select name="from_station" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <option value="">Select Station</option>
+                                    <option value="1">Dhaka</option>
+                                    <option value="2">Chittagong</option>
+                                    <option value="3">Sylhet</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">To</label>
-                                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                                    <option>Chittagong</option>
-                                    <option>Dhaka</option>
-                                    <option>Sylhet</option>
+                                <select name="to_station" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <option value="">Select Station</option>
+                                    <option value="2">Chittagong</option>
+                                    <option value="1">Dhaka</option>
+                                    <option value="3">Sylhet</option>
                                 </select>
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Journey Date</label>
-                            <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value="{{ date('Y-m-d') }}">
+                            <input type="date" name="journey_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" value="{{ date('Y-m-d') }}">
                         </div>
-                        <button type="button" class="w-full bg-purple-600 text-white py-2 px-4 rounded-lg text-sm hover:bg-purple-700 transition duration-200">
+                        <button type="submit" class="w-full bg-purple-600 text-white py-2 px-4 rounded-lg text-sm hover:bg-purple-700 transition duration-200">
                             Search Trains
                         </button>
                     </form>
@@ -166,12 +180,14 @@
                 <!-- PNR Search -->
                 <div class="mb-6">
                     <h3 class="font-semibold text-gray-800 mb-4">PNR Search</h3>
-                    <div class="flex space-x-2">
-                        <input type="text" placeholder="Enter PNR or Phone" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition duration-200">
-                            Search
-                        </button>
-                    </div>
+                    <form action="{{ route('ticket-seller.search') }}" method="GET">
+                        <div class="flex space-x-2">
+                            <input type="text" name="pnr" placeholder="Enter PNR or Phone" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition duration-200">
+                                Search
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <!-- Shift Summary -->
@@ -192,7 +208,7 @@
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">Cash Collected</span>
-                            <span class="font-medium text-green-600">৳{{ number_format($seller_stats['cash_collected']) }}</span>
+                            <span class="font-medium text-green-600">৳{{ number_format($seller_stats['cash_collected'], 2) }}</span>
                         </div>
                     </div>
                     <button class="w-full mt-4 bg-green-600 text-white py-2 px-4 rounded-lg text-sm hover:bg-green-700 transition duration-200">

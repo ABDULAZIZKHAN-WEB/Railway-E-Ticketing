@@ -11,7 +11,16 @@ class Train extends Model
         'train_name',
         'train_name_bn',
         'train_type',
-        'total_coaches',
         'status',
     ];
+
+    public function coaches()
+    {
+        return $this->hasMany(TrainCoach::class);
+    }
+
+    public function activeCoaches()
+    {
+        return $this->hasMany(TrainCoach::class)->where('status', 'active');
+    }
 }

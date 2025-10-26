@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Train;
+use App\Models\TrainCoach;
 use Illuminate\Http\Request;
 
 class TrainController extends Controller
@@ -59,12 +60,33 @@ class TrainController extends Controller
             'train_number' => 'required|unique:trains',
             'train_name' => 'required',
             'train_type' => 'required|in:express,mail,local,intercity',
-            'total_coaches' => 'required|integer|min:1',
+            'compartments' => 'required|array|min:1',
+            'compartments.*.seat_class_id' => 'required|exists:seat_classes,id',
+            'compartments.*.coach_number' => 'required|string|max:10',
+            'compartments.*.total_seats' => 'required|integer|min:1|max:80',
         ]);
 
-        Train::create($request->all());
+        // Create the train
+        $train = Train::create([
+            'train_number' => $request->train_number,
+            'train_name' => $request->train_name,
+            'train_name_bn' => $request->train_name_bn,
+            'train_type' => $request->train_type,
+            'status' => $request->status,
+        ]);
 
-        return redirect()->route('admin.trains')->with('success', 'Train created successfully.');
+        // Create compartments (coaches) for the train
+        foreach ($request->compartments as $compartment) {
+            TrainCoach::create([
+                'train_id' => $train->id,
+                'seat_class_id' => $compartment['seat_class_id'],
+                'coach_number' => $compartment['coach_number'],
+                'total_seats' => $compartment['total_seats'],
+                'status' => 'active',
+            ]);
+        }
+
+        return redirect()->route('admin.trains')->with('success', 'Train created successfully with compartments.');
     }
 
     /**

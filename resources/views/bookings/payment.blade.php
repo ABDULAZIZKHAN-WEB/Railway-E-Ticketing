@@ -184,27 +184,33 @@
                     <div class="space-y-3 mb-6">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Train:</span>
-                            <span class="font-medium">Suborno Express</span>
+                            <span class="font-medium">{{ $schedule->train->train_name ?? 'N/A' }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Route:</span>
-                            <span class="font-medium">Dhaka → Chittagong</span>
+                            <span class="font-medium">{{ $fromStation->station_name ?? 'N/A' }} → {{ $toStation->station_name ?? 'N/A' }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Date:</span>
-                            <span class="font-medium">25 Oct 2025</span>
+                            <span class="font-medium">{{ $bookingData['journey_date'] ?? date('d M Y') }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Time:</span>
-                            <span class="font-medium">08:30 AM</span>
+                            <span class="font-medium">{{ $schedule->departure_time ? $schedule->departure_time->format('g:i A') : 'N/A' }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Class:</span>
-                            <span class="font-medium">AC Chair</span>
+                            <span class="font-medium">{{ $seatClass->name ?? 'AC Chair' }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Seats:</span>
-                            <span class="font-medium" id="selected-seats-display">2A, 2B</span>
+                            <span class="font-medium" id="selected-seats-display">
+                                @if(isset($bookingData['seats']) && is_array($bookingData['seats']))
+                                    {{ implode(', ', array_column($bookingData['seats'], 'number')) }}
+                                @else
+                                    2A, 2B
+                                @endif
+                            </span>
                         </div>
                     </div>
 
@@ -214,9 +220,9 @@
                     <div class="mb-6">
                         <h4 class="font-medium mb-2">Passenger Details</h4>
                         <div class="text-sm space-y-1">
-                            <div><strong>Name:</strong> <span id="passenger-name-display">John Doe</span></div>
-                            <div><strong>Mobile:</strong> <span id="mobile-number-display">01712345678</span></div>
-                            <div><strong>NID:</strong> <span id="nid-number-display">1234567890123</span></div>
+                            <div><strong>Name:</strong> <span id="passenger-name-display">{{ $bookingData['passengerName'] ?? 'John Doe' }}</span></div>
+                            <div><strong>Mobile:</strong> <span id="mobile-number-display">{{ $bookingData['mobileNumber'] ?? '01712345678' }}</span></div>
+                            <div><strong>NID:</strong> <span id="nid-number-display">{{ $bookingData['nidNumber'] ?? '1234567890123' }}</span></div>
                         </div>
                     </div>
 
@@ -225,12 +231,12 @@
                     <!-- Fare Breakdown -->
                     <div class="space-y-2 mb-6">
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Base Fare (2 seats):</span>
-                            <span>৳ 1,700</span>
+                            <span class="text-gray-600">Base Fare ({{ isset($bookingData['seats']) ? count($bookingData['seats']) : 2 }} seats):</span>
+                            <span>৳ {{ number_format(($seatClass->base_price_per_km ?? 850) * (isset($bookingData['seats']) ? count($bookingData['seats']) : 2), 2) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">VAT (15%):</span>
-                            <span>৳ 255</span>
+                            <span>৳ {{ number_format((($seatClass->base_price_per_km ?? 850) * (isset($bookingData['seats']) ? count($bookingData['seats']) : 2)) * 0.15, 2) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Service Charge:</span>
@@ -243,7 +249,9 @@
                         <hr>
                         <div class="flex justify-between font-semibold text-lg">
                             <span>Total Amount:</span>
-                            <span class="text-green-600" id="total-amount-display">৳ 2,020</span>
+                            <span class="text-green-600" id="total-amount-display">
+                                ৳ {{ number_format((($seatClass->base_price_per_km ?? 850) * 1.15 + 65) * (isset($bookingData['seats']) ? count($bookingData['seats']) : 2), 2) }}
+                            </span>
                         </div>
                     </div>
 
@@ -259,9 +267,11 @@
                     <div class="space-y-3">
                         <button id="pay-now-btn"
                             class="w-full bg-green-600 text-white py-3 rounded-md font-medium hover:bg-green-700 transition duration-200">
-                            💳 Pay Now - <span id="pay-button-amount">৳ 2,020</span>
+                            💳 Pay Now - <span id="pay-button-amount">
+                                ৳ {{ number_format((($seatClass->base_price_per_km ?? 850) * 1.15 + 65) * (isset($bookingData['seats']) ? count($bookingData['seats']) : 2), 2) }}
+                            </span>
                         </button>
-                        <button onclick="window.location.href='/booking/seat-selection'"
+                        <button onclick="window.location.href='{{ route('booking.seat-selection') }}'"
                             class="w-full border border-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-50">
                             ← Back to Seat Selection
                         </button>
@@ -280,76 +290,66 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Load booking data from sessionStorage
-        const bookingData = JSON.parse(sessionStorage.getItem('bookingData') || '{}');
-
-        if (bookingData.seats) {
-            document.getElementById('selected-seats-display').textContent = bookingData.seats.join(', ');
-        }
-        if (bookingData.passengerName) {
-            document.getElementById('passenger-name-display').textContent = bookingData.passengerName;
-        }
-        if (bookingData.mobileNumber) {
-            document.getElementById('mobile-number-display').textContent = bookingData.mobileNumber;
-        }
-        if (bookingData.nidNumber) {
-            document.getElementById('nid-number-display').textContent = bookingData.nidNumber;
-        }
-        if (bookingData.totalFare) {
-            document.getElementById('total-amount-display').textContent = bookingData.totalFare;
-            document.getElementById('pay-button-amount').textContent = bookingData.totalFare;
-        }
-
-        // Payment method switching
+        // Payment method switching - add null checks
         const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
         const paymentForms = document.querySelectorAll('.payment-form');
 
-        paymentMethods.forEach(method => {
-            method.addEventListener('change', function() {
-                // Hide all forms
-                paymentForms.forEach(form => form.classList.add('hidden'));
+        if (paymentMethods.length > 0 && paymentForms.length > 0) {
+            paymentMethods.forEach(method => {
+                method.addEventListener('change', function() {
+                    // Hide all forms
+                    paymentForms.forEach(form => form.classList.add('hidden'));
 
-                // Show selected form
-                const selectedForm = document.getElementById(this.value.replace('_', '-') + '-form');
-                if (selectedForm) {
-                    selectedForm.classList.remove('hidden');
-                }
+                    // Show selected form
+                    const selectedForm = document.getElementById(this.value.replace('_', '-') + '-form');
+                    if (selectedForm) {
+                        selectedForm.classList.remove('hidden');
+                    }
+                });
             });
-        });
-
-        // Payment timer
-        let timeLeft = 15 * 60; // 15 minutes
-        const timerElement = document.getElementById('payment-timer');
-
-        function updateTimer() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-            if (timeLeft <= 0) {
-                alert('Payment session expired. Please start booking again.');
-                window.location.href = '/search-trains';
-            } else {
-                timeLeft--;
-            }
         }
 
-        setInterval(updateTimer, 1000);
+        // Payment timer - add null check
+        const timerElement = document.getElementById('payment-timer');
+        if (timerElement) {
+            let timeLeft = 15 * 60; // 15 minutes
 
-        // Pay now button
-        document.getElementById('pay-now-btn').addEventListener('click', function() {
-            const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+            function updateTimer() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-            // Simulate payment processing
-            this.disabled = true;
-            this.innerHTML = '⏳ Processing Payment...';
+                if (timeLeft <= 0) {
+                    alert('Payment session expired. Please start booking again.');
+                    window.location.href = '{{ route('search.trains') }}';
+                } else {
+                    timeLeft--;
+                }
+            }
 
-            setTimeout(() => {
-                alert('Payment successful! Your ticket has been booked.');
-                // Redirect to booking confirmation or my bookings
-                window.location.href = '/my-bookings';
-            }, 3000);
-        });
+            setInterval(updateTimer, 1000);
+        }
+
+        // Pay now button - add null check
+        const payNowButton = document.getElementById('pay-now-btn');
+        if (payNowButton) {
+            payNowButton.addEventListener('click', function() {
+                const selectedMethodElement = document.querySelector('input[name="payment_method"]:checked');
+                if (!selectedMethodElement) return;
+                
+                const selectedMethod = selectedMethodElement.value;
+
+                // Simulate payment processing
+                this.disabled = true;
+                this.innerHTML = '⏳ Processing Payment...';
+
+                setTimeout(() => {
+                    alert('Payment successful! Your ticket has been booked.');
+                    // Redirect to booking confirmation or my bookings
+                    window.location.href = '{{ route('my.bookings') }}';
+                }, 3000);
+            });
+        }
     });
 </script>
 @endsection

@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Booking;
+use App\Models\TrainSchedule;
+use App\Models\Platform;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -41,6 +45,17 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
             \Log::info('Login successful', ['user_id' => Auth::id()]);
+            
+            // Check if there's a redirect target after login (for booking flow)
+            if (session()->has('redirect_after_login')) {
+                $redirectRoute = session('redirect_after_login');
+                session()->forget('redirect_after_login');
+                
+                // Only redirect to allowed routes
+                if (in_array($redirectRoute, ['booking.seat-selection'])) {
+                    return redirect()->route($redirectRoute)->with('success', 'Welcome back! Login successful.');
+                }
+            }
             
             return redirect('/dashboard')->with('success', 'Welcome back! Login successful.');
         }
@@ -126,6 +141,7 @@ class AuthController extends Controller
             'total_bookings' => \DB::table('bookings')->count(),
             'today_bookings' => \DB::table('bookings')->whereDate('created_at', today())->count(),
             'total_revenue' => \DB::table('bookings')->where('payment_status', 'paid')->sum('total_amount'),
+            'total_schedules' => \DB::table('train_schedules')->count(),
         ];
 
         $recent_bookings = \DB::table('bookings')
@@ -142,22 +158,46 @@ class AuthController extends Controller
     private function stationMasterDashboard()
     {
         $user = Auth::user();
+        $today = Carbon::today();
         
-        // Mock data for station master (in real app, filter by assigned station)
+        // Get today's train schedules
+        $trainSchedules = TrainSchedule::whereDate('created_at', $today)
+            ->with(['train'])
+            ->get();
+            
+        // Calculate statistics
+        $trainsToday = $trainSchedules->count();
+        $arrivalsToday = $trainSchedules->where('arrival_time', '!=', null)->count();
+        $departuresToday = $trainSchedules->where('departure_time', '!=', null)->count();
+        $delayedTrains = $trainSchedules->where('delay_minutes', '>', 0)->count();
+        
+        // Estimate passengers (in a real app, this would come from booking data)
+        $passengersToday = $trainsToday * 50; // Rough estimate
+        
+        // Station stats
         $station_stats = [
-            'assigned_station' => 'Dhaka Railway Station',
-            'trains_today' => 25,
-            'arrivals_today' => 12,
-            'departures_today' => 13,
-            'delayed_trains' => 2,
-            'passengers_today' => 1250,
+            'assigned_station' => 'Dhaka Railway Station', // This would come from user profile in a real app
+            'trains_today' => $trainsToday,
+            'arrivals_today' => $arrivalsToday,
+            'departures_today' => $departuresToday,
+            'delayed_trains' => $delayedTrains,
+            'passengers_today' => $passengersToday,
         ];
-
-        $todays_trains = [
-            ['train_name' => 'Suborno Express', 'train_number' => '701', 'type' => 'arrival', 'scheduled_time' => '08:30', 'status' => 'on_time'],
-            ['train_name' => 'Mohanagar Godhuli', 'train_number' => '703', 'type' => 'departure', 'scheduled_time' => '15:30', 'status' => 'delayed'],
-            ['train_name' => 'Turna Nishita', 'train_number' => '705', 'type' => 'arrival', 'scheduled_time' => '23:00', 'status' => 'on_time'],
-        ];
+        
+        // Get today's trains with status
+        $todays_trains = $trainSchedules
+            ->take(5)
+            ->map(function ($schedule) {
+                return [
+                    'train_name' => $schedule->train ? $schedule->train->train_name : 'Unknown Train',
+                    'train_number' => $schedule->train ? $schedule->train->train_number : 'N/A',
+                    'type' => $schedule->arrival_time ? 'arrival' : 'departure',
+                    'scheduled_time' => $schedule->arrival_time ? 
+                        $schedule->arrival_time->format('h:i A') : 
+                        ($schedule->departure_time ? $schedule->departure_time->format('h:i A') : 'N/A'),
+                    'status' => $schedule->delay_minutes > 0 ? 'delayed' : 'on_time'
+                ];
+            });
 
         return view('dashboard.station-master-dashboard', compact('station_stats', 'todays_trains'));
     }
@@ -166,36 +206,82 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         
-        // Mock data for ticket seller
+        // Get today's date
+        $today = Carbon::today();
+        
+        // Get bookings created by this ticket seller today
+        $bookingsQuery = Booking::where('booked_by_user_id', $user->id)
+            ->whereDate('created_at', $today);
+            
+        // Get all bookings for statistics
+        $allBookings = $bookingsQuery->get();
+        
+        // Calculate statistics
+        $ticketsSoldToday = $allBookings->count();
+        $cashCollected = $allBookings->where('payment_status', 'paid')->sum('total_amount');
+        $pendingTransactions = $allBookings->where('payment_status', 'pending')->count();
+        
+        // Get recent sales (last 5 bookings)
+        $recentSales = $bookingsQuery
+            ->with(['bookingPassengers', 'trainSchedule.train'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'pnr' => $booking->booking_reference,
+                    'passenger' => $booking->bookingPassengers->first()->passenger_name ?? 'N/A',
+                    'train' => $booking->trainSchedule->train->train_name ?? 'N/A',
+                    'amount' => $booking->total_amount,
+                    'time' => $booking->created_at->format('h:i A')
+                ];
+            });
+            
+        // Get seller statistics (using the correct variable name)
         $seller_stats = [
-            'assigned_counter' => 'Counter #3',
+            'assigned_counter' => 'Counter #' . ($user->id % 5 + 1), // Mock counter assignment
             'shift' => 'Morning Shift (8:00 AM - 4:00 PM)',
-            'tickets_sold_today' => 45,
-            'cash_collected' => 12500,
-            'pending_transactions' => 3,
+            'tickets_sold_today' => $ticketsSoldToday,
+            'cash_collected' => $cashCollected,
+            'pending_transactions' => $pendingTransactions,
         ];
 
-        $recent_sales = [
-            ['pnr' => 'PNR123456', 'passenger' => 'John Doe', 'train' => 'Suborno Express', 'amount' => 950, 'time' => '10:30 AM'],
-            ['pnr' => 'PNR123457', 'passenger' => 'Jane Smith', 'train' => 'Mohanagar Godhuli', 'amount' => 750, 'time' => '11:15 AM'],
-            ['pnr' => 'PNR123458', 'passenger' => 'Bob Wilson', 'train' => 'Turna Nishita', 'amount' => 1250, 'time' => '12:00 PM'],
-        ];
-
-        return view('dashboard.ticket-seller-dashboard', compact('seller_stats', 'recent_sales'));
+        return view('dashboard.ticket-seller-dashboard', compact('seller_stats', 'recentSales'));
     }
 
     private function passengerDashboard()
     {
         $user = Auth::user();
         
-        // Passenger dashboard data
+        // Get user's recent bookings (using the correct variable name for the view)
+        $bookings = Booking::where('user_id', $user->id)
+            ->with(['trainSchedule.train', 'fromStation', 'toStation', 'bookingPassengers'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+            
+        // Get user's upcoming journeys
+        $upcoming_journeys = Booking::where('user_id', $user->id)
+            ->where('journey_date', '>=', today())
+            ->where('booking_status', 'confirmed')
+            ->with(['trainSchedule.train', 'fromStation', 'toStation'])
+            ->orderBy('journey_date')
+            ->limit(3)
+            ->get();
+            
+        // Calculate statistics
+        $total_bookings = Booking::where('user_id', $user->id)->count();
+        $total_spent = Booking::where('user_id', $user->id)
+            ->where('payment_status', 'paid')
+            ->sum('total_amount');
+            
         $passenger_stats = [
-            'total_bookings' => 0, // In real app: $user->bookings()->count()
-            'total_spent' => 0, // In real app: $user->bookings()->sum('total_amount')
-            'upcoming_journeys' => 0,
-            'loyalty_points' => 0,
+            'total_bookings' => $total_bookings,
+            'total_spent' => $total_spent,
+            'upcoming_journeys' => $upcoming_journeys->count(),
+            'loyalty_points' => $total_bookings * 10 // Simple loyalty points calculation
         ];
 
-        return view('dashboard.passenger-dashboard', compact('passenger_stats'));
+        return view('dashboard.passenger-dashboard', compact('passenger_stats', 'bookings', 'upcoming_journeys'));
     }
 }

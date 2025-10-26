@@ -13,7 +13,7 @@
                     <p class="text-gray-600 mt-2">Daily cash collection and transaction summary</p>
                 </div>
                 <div class="flex space-x-4">
-                    <a href="/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200">
+                    <a href="{{ route('dashboard') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200">
                         ← Back to Dashboard
                     </a>
                     <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
@@ -26,25 +26,46 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Cash Summary -->
             <div class="lg:col-span-2">
+                <!-- Date Filter -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">📅 Filter Report</h2>
+                    <form method="POST" action="{{ route('ticket-seller.cash-report.post') }}" class="flex flex-wrap gap-4">
+                        @csrf
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                            <input type="date" name="start_date" value="{{ $startDate ?? date('Y-m-d') }}" class="px-3 py-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                            <input type="date" name="end_date" value="{{ $endDate ?? date('Y-m-d') }}" class="px-3 py-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="self-end">
+                            <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition duration-200">
+                                Filter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
                 <!-- Today's Summary -->
                 <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6">📊 Today's Cash Summary</h2>
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">📊 Cash Summary</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                         <div class="text-center p-4 bg-green-50 rounded-lg">
-                            <div class="text-2xl font-bold text-green-600">৳12,500</div>
+                            <div class="text-2xl font-bold text-green-600">৳{{ number_format($totalCashCollected ?? 12500, 2) }}</div>
                             <div class="text-sm text-gray-600">Cash Collected</div>
                         </div>
                         <div class="text-center p-4 bg-blue-50 rounded-lg">
-                            <div class="text-2xl font-bold text-blue-600">45</div>
+                            <div class="text-2xl font-bold text-blue-600">{{ $totalTicketsSold ?? 45 }}</div>
                             <div class="text-sm text-gray-600">Tickets Sold</div>
                         </div>
                         <div class="text-center p-4 bg-purple-50 rounded-lg">
-                            <div class="text-2xl font-bold text-purple-600">৳278</div>
+                            <div class="text-2xl font-bold text-purple-600">৳{{ number_format($averageSale ?? 278, 2) }}</div>
                             <div class="text-sm text-gray-600">Average Sale</div>
                         </div>
                         <div class="text-center p-4 bg-yellow-50 rounded-lg">
-                            <div class="text-2xl font-bold text-yellow-600">3</div>
+                            <div class="text-2xl font-bold text-yellow-600">{{ $pendingTransactions ?? 3 }}</div>
                             <div class="text-sm text-gray-600">Pending</div>
                         </div>
                     </div>
@@ -62,27 +83,23 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                <tr>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">08:00 - 09:00</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">8</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-green-600">৳2,400</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-blue-600">৳1,200</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">৳3,600</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">09:00 - 10:00</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">12</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-green-600">৳3,200</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-blue-600">৳1,800</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">৳5,000</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">10:00 - 11:00</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">6</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-green-600">৳1,800</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-blue-600">৳900</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">৳2,700</td>
-                                </tr>
+                                @if(isset($hourlyData) && count($hourlyData) > 0)
+                                    @foreach($hourlyData as $hourData)
+                                    <tr>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $hourData['hour'] }}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $hourData['tickets'] }}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-green-600">৳{{ number_format($hourData['cash'], 2) }}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-blue-600">৳{{ number_format($hourData['card'], 2) }}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">৳{{ number_format($hourData['total'], 2) }}</td>
+                                    </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="5" class="px-4 py-4 text-center text-sm text-gray-500">
+                                            No transaction data available for the selected period
+                                        </td>
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -93,35 +110,52 @@
                     <h2 class="text-xl font-semibold text-gray-800 mb-6">💳 Transaction Details</h2>
                     
                     <div class="space-y-4">
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <h4 class="font-medium text-gray-800">Cash Transaction #001</h4>
-                                    <p class="text-sm text-gray-600">PNR: BD123456789 • 10:30 AM</p>
+                        @if(isset($bookings) && count($bookings) > 0)
+                            @foreach($bookings->take(10) as $booking)
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">
+                                            {{ $booking->payment_status === 'paid' ? 'Cash' : 'Pending' }} Transaction #{{ $booking->id }}
+                                        </h4>
+                                        <p class="text-sm text-gray-600">
+                                            PNR: {{ $booking->booking_reference }} • {{ $booking->created_at->format('g:i A') }}
+                                        </p>
+                                    </div>
+                                    <span class="text-lg font-bold 
+                                        @if($booking->payment_status === 'paid') text-green-600
+                                        @else text-yellow-600
+                                        @endif">
+                                        ৳{{ number_format($booking->total_amount, 2) }}
+                                    </span>
                                 </div>
-                                <span class="text-lg font-bold text-green-600">৳950</span>
-                            </div>
-                            <div class="text-sm text-gray-700">
-                                <p><strong>Customer:</strong> John Doe</p>
-                                <p><strong>Route:</strong> Dhaka → Chittagong</p>
-                                <p><strong>Payment:</strong> Cash</p>
-                            </div>
-                        </div>
-
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <h4 class="font-medium text-gray-800">Card Transaction #002</h4>
-                                    <p class="text-sm text-gray-600">PNR: BD123456790 • 11:15 AM</p>
+                                <div class="text-sm text-gray-700">
+                                    <p><strong>Customer:</strong> 
+                                        @if($booking->bookingPassengers->first())
+                                            {{ $booking->bookingPassengers->first()->passenger_name }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </p>
+                                    <p><strong>Route:</strong> 
+                                        {{ $booking->fromStation->station_name ?? 'N/A' }} → 
+                                        {{ $booking->toStation->station_name ?? 'N/A' }}
+                                    </p>
+                                    <p><strong>Payment:</strong> 
+                                        @if($booking->payment_status === 'paid')
+                                            Cash
+                                        @else
+                                            Pending
+                                        @endif
+                                    </p>
                                 </div>
-                                <span class="text-lg font-bold text-blue-600">৳750</span>
                             </div>
-                            <div class="text-sm text-gray-700">
-                                <p><strong>Customer:</strong> Jane Smith</p>
-                                <p><strong>Route:</strong> Dhaka → Sylhet</p>
-                                <p><strong>Payment:</strong> Visa Card ****1234</p>
+                            @endforeach
+                        @else
+                            <div class="text-center py-8 text-gray-500">
+                                <p>No transactions found for the selected period</p>
                             </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -134,19 +168,19 @@
                     <div class="space-y-4">
                         <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                             <h3 class="font-semibold text-green-800 mb-2">Opening Balance</h3>
-                            <p class="text-2xl font-bold text-green-600">৳5,000</p>
+                            <p class="text-2xl font-bold text-green-600">৳{{ number_format($openingBalance ?? 5000, 2) }}</p>
                             <p class="text-sm text-green-700">Started at 8:00 AM</p>
                         </div>
 
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                             <h3 class="font-semibold text-blue-800 mb-2">Cash Collected</h3>
-                            <p class="text-2xl font-bold text-blue-600">৳12,500</p>
-                            <p class="text-sm text-blue-700">From 45 transactions</p>
+                            <p class="text-2xl font-bold text-blue-600">৳{{ number_format($totalCashCollected ?? 12500, 2) }}</p>
+                            <p class="text-sm text-blue-700">From {{ $totalTicketsSold ?? 45 }} transactions</p>
                         </div>
 
                         <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
                             <h3 class="font-semibold text-purple-800 mb-2">Current Balance</h3>
-                            <p class="text-2xl font-bold text-purple-600">৳17,500</p>
+                            <p class="text-2xl font-bold text-purple-600">৳{{ number_format($currentBalance ?? 17500, 2) }}</p>
                             <p class="text-sm text-purple-700">Ready for deposit</p>
                         </div>
                     </div>
@@ -175,7 +209,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Avg. per Hour</span>
-                            <span class="font-medium">৳1,923</span>
+                            <span class="font-medium">৳{{ number_format(($totalCashCollected ?? 12500) / 6.5, 2) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Cash vs Card</span>

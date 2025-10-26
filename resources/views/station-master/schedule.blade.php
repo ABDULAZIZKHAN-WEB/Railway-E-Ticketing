@@ -10,10 +10,10 @@
             <div class="flex justify-between items-center">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">📋 Train Schedule</h1>
-                    <p class="text-gray-600 mt-2">Dhaka Railway Station - {{ date('l, F d, Y') }}</p>
+                    <p class="text-gray-600 mt-2">Dhaka Railway Station - {{ now()->format('l, F d, Y') }}</p>
                 </div>
                 <div class="flex space-x-4">
-                    <a href="/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200">
+                    <a href="{{ route('station-master.dashboard') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200">
                         ← Back to Dashboard
                     </a>
                     <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200" onclick="location.reload();">
@@ -27,16 +27,16 @@
         <div class="bg-white rounded-lg shadow-md mb-8">
             <div class="border-b border-gray-200">
                 <nav class="-mb-px flex space-x-8 px-6">
-                    <button class="border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600">
+                    <button class="border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600 tab-button" data-tab="all">
                         All Trains
                     </button>
-                    <button class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                    <button class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 tab-button" data-tab="arrivals">
                         Arrivals
                     </button>
-                    <button class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                    <button class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 tab-button" data-tab="departures">
                         Departures
                     </button>
-                    <button class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                    <button class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 tab-button" data-tab="delayed">
                         Delayed
                     </button>
                 </nav>
@@ -58,7 +58,8 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($schedules as $schedule)
-                        <tr>
+                        <tr data-type="{{ $schedule->route->start_station_id == 1 ? 'departure' : 'arrival' }}" 
+                            data-status="{{ $schedule->status }}">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">{{ $schedule->train->train_name ?? 'N/A' }}</div>
@@ -74,18 +75,28 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {{ $schedule->route->startStation->station_name ?? 'N/A' }} → {{ $schedule->route->endStation->station_name ?? 'N/A' }}
+                                @if($schedule->route->routeStations->count() > 0)
+                                    <div class="text-xs text-gray-500">
+                                        Via {{ $schedule->route->routeStations->count() }} intermediate station(s)
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ \Carbon\Carbon::parse($schedule->departure_time)->format('g:i A') }}
+                                {{ $schedule->departure_time ? $schedule->departure_time->format('g:i A') : 'N/A' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                Platform {{ rand(1, 4) }}
+                                @if($schedule->platform)
+                                    Platform {{ $schedule->platform }}
+                                @else
+                                    Platform {{ rand(1, 4) }}
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                                     @if($schedule->status === 'on_time') bg-green-100 text-green-800
                                     @elseif($schedule->status === 'delayed') bg-red-100 text-red-800
-                                    @else bg-gray-100 text-gray-800 @endif">
+                                    @elseif($schedule->status === 'cancelled') bg-gray-100 text-gray-800
+                                    @else bg-yellow-100 text-yellow-800 @endif">
                                     @if($schedule->status === 'delayed')
                                         Delayed {{ $schedule->delay_minutes }} min
                                     @else
@@ -121,12 +132,12 @@
                     <h3 class="font-semibold text-gray-800">Make Announcement</h3>
                 </div>
             </a>
-            <button class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200" onclick="openDelayModal()">
+            <a href="{{ route('station-master.delays') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
                 <div class="text-center">
                     <div class="text-3xl mb-2">⏰</div>
                     <h3 class="font-semibold text-gray-800">Report Delay</h3>
                 </div>
-            </button>
+            </a>
             <a href="{{ route('station-master.platforms') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
                 <div class="text-center">
                     <div class="text-3xl mb-2">🔧</div>
@@ -206,6 +217,38 @@
     </div>
     
     <script>
+        // Tab functionality
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('border-blue-500', 'text-blue-600');
+                    btn.classList.add('border-transparent', 'text-gray-500');
+                });
+                
+                // Add active class to clicked button
+                this.classList.remove('border-transparent', 'text-gray-500');
+                this.classList.add('border-blue-500', 'text-blue-600');
+                
+                // Filter table rows based on selected tab
+                const tabType = this.getAttribute('data-tab');
+                filterTable(tabType);
+            });
+        });
+        
+        function filterTable(tabType) {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                if (tabType === 'all') {
+                    row.style.display = '';
+                } else if (tabType === 'delayed') {
+                    row.style.display = row.getAttribute('data-status') === 'delayed' ? '' : 'none';
+                } else {
+                    row.style.display = row.getAttribute('data-type') === tabType ? '' : 'none';
+                }
+            });
+        }
+        
         function openUpdateModal(scheduleId) {
             const form = document.getElementById('updateForm');
             form.action = `/station-master/schedule/${scheduleId}`;

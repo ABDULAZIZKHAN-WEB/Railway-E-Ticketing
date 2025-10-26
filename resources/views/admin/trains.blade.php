@@ -59,7 +59,8 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Train Details</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coaches</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compartments</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Seats</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -82,7 +83,22 @@
                                     {{ ucfirst($train->train_type) }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $train->total_coaches }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ $train->coaches->count() }} compartments</div>
+                                <div class="text-xs text-gray-500">
+                                    @foreach($train->coaches->take(3) as $coach)
+                                        <span class="inline-block bg-gray-100 rounded px-2 py-1 mr-1 mb-1">
+                                            {{ $coach->coach_number }}
+                                        </span>
+                                    @endforeach
+                                    @if($train->coaches->count() > 3)
+                                        <span class="text-gray-400">+{{ $train->coaches->count() - 3 }} more</span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $train->coaches->sum('total_seats') }} seats
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                                     @if($train->status == 'active') bg-green-100 text-green-800
@@ -105,7 +121,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
                                 No trains found. <a href="{{ route('admin.trains.create') }}" class="text-green-600 hover:text-green-800">Add your first train</a>.
                             </td>
                         </tr>

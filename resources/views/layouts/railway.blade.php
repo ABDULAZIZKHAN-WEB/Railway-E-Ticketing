@@ -114,7 +114,7 @@
                 </div>
             </div>
             <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-                <p>&copy; {{ date('Y') }} Bangladesh Railway. All rights reserved. | Developed with ❤️ for better railway services.</p>
+                <p>&copy; {{ date('Y') }} Bangladesh Railway. All rights reserved. | Developed by ABDUL AZIZ KHAN and with ❤️ for better railway services.</p>
             </div>
         </div>
     </footer>

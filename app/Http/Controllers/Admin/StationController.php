@@ -133,4 +133,19 @@ class StationController extends Controller
 
         return redirect()->route('admin.stations')->with('success', 'Station deleted successfully.');
     }
+    
+    /**
+     * Toggle the status of the specified station.
+     *
+     * @param  \App\Models\Station  $station
+     * @return \Illuminate\Http\Response
+     */
+    public function toggleStatus(Station $station)
+    {
+        $station->status = $station->status === 'active' ? 'inactive' : 'active';
+        $station->save();
+
+        $action = $station->status === 'active' ? 'activated' : 'deactivated';
+        return redirect()->route('admin.stations')->with('success', "Station {$action} successfully.");
+    }
 }
